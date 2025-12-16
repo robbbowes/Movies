@@ -2,7 +2,7 @@ using Movies.Application.Models;
 
 namespace Movies.Application.Repositories;
 
-public class MovieRepository : IMovieRespository
+public class MovieRepository : IMovieRepository
 {
     private readonly List<Movie> _movies = new();
 
@@ -15,6 +15,12 @@ public class MovieRepository : IMovieRespository
     public Task<Movie?> GetByIdAsync(Guid id)
     {
         var movie = _movies.SingleOrDefault(m => m.Id == id);
+        return Task.FromResult(movie);
+    }
+
+    public Task<Movie?> GetBySlugAsync(string slug)
+    {
+        var movie = _movies.SingleOrDefault(m => m.Slug == slug);
         return Task.FromResult(movie);
     }
 

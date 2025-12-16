@@ -7,7 +7,7 @@ public static class ApplicationServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddSingleton<IMovieRespository, MovieRepository>();
+        services.AddSingleton<IMovieRepository, MovieRepository>();
         return services;
     }
 }
