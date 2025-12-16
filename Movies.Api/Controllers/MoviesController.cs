@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
 using Movies.Application.Repositories;
 using Movies.Contracts.Requests;
-using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers;
 
@@ -12,19 +11,36 @@ public class MoviesController(IMovieRespository movieRepository) : ControllerBas
     private readonly IMovieRespository _movieRepository = movieRepository;
 
     [HttpPost(ApiEndpoints.Movies.Create)]
-    public async Task<IActionResult> Create([FromBody]CreateMovieRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateMovieRequest request)
     {
         var movie = request.MapToMovie();
         await _movieRepository.CreateAsync(movie);
 
-        var movieResponse = new MovieResponse
+        var movieResponse = movie.MapToResponse();
+        return CreatedAtAction(nameof(Get), new { id = movieResponse.Id }, movieResponse);
+    }
+
+    [HttpGet(ApiEndpoints.Movies.Get)]
+    public async Task<IActionResult> Get([FromRoute] Guid id)
+    {
+        var movie = await _movieRepository.GetByIdAsync(id);
+        if (movie is null)
         {
-            Id = movie.Id,
-            Title = movie.Title,
-            YearOfRelease = movie.YearOfRelease,
-            Genres = movie.Genres.ToList()
-        };
-        return Created($"/{ApiEndpoints.Movies.Create}/{movie.Id}", movieResponse);
+            return NotFound();
+        }
+
+        var response = movie.MapToResponse();
+        return Ok(response);
+    }
+
+    [HttpGet(ApiEndpoints.Movies.GetAll)]
+    public async Task<IActionResult> GetAll()
+    {
+        var movies = await _movieRepository.GetAllAsync();
+
+        var moviesResponse = movies.MapToMoviesResponse();
+        
+        return Ok(moviesResponse);
     }
 
 }
