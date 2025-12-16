@@ -1,19 +1,18 @@
 using Movies.Application;
+using Movies.Application.Database;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+var config = builder.Configuration;
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplication();
+builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -25,5 +24,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+var dbInitialiser = app.Services.GetRequiredService<DbInitialiser>();
+await dbInitialiser.InitialiseAsync();
 
 app.Run();
